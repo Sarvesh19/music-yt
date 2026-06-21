@@ -36,6 +36,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# python
+.venv
+__pycache__/
+*.pyc
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ytdl temp files
+*-player-script.js
