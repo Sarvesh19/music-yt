@@ -72,6 +72,10 @@ def get_audio(
         raise HTTPException(500, str(e))
 
 
+@app.get("/")
+def root():
+    return {"service": "MelodiX Audio Proxy", "status": "running"}
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
