@@ -21,20 +21,32 @@ app.add_middleware(
 def extract_audio(video_id: str) -> dict:
     url = f"https://www.youtube.com/watch?v={video_id}"
     with tempfile.TemporaryDirectory() as tmpdir:
+        cmd = [
+            "yt-dlp",
+            "--no-warnings",
+            "--print-json",
+            "-f", "bestaudio/best",
+            "--no-playlist",
+            "--user-agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "--add-header", "Accept-Language: en-US,en;q=0.9",
+            "--extractor-args", "youtube:player_client=android_embedded;skip=webpage,dash",
+            "--geo-bypass",
+        ]
+        cookies = os.environ.get("YT_COOKIES")
+        if cookies:
+            cookies_file = os.path.join(tmpdir, "cookies.txt")
+            with open(cookies_file, "w") as f:
+                f.write(cookies)
+            cmd.extend(["--cookies", cookies_file])
+
+        proxy = os.environ.get("YT_PROXY")
+        if proxy:
+            cmd.extend(["--proxy", proxy])
+
+        cmd.append(url)
         result = subprocess.run(
-            [
-                "yt-dlp",
-                "--no-warnings",
-                "--print-json",
-                "-f", "bestaudio/best",
-                "--no-playlist",
-                "--user-agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                "--add-header", "Accept-Language: en-US,en;q=0.9",
-                "--extractor-args", "youtube:player-client=android_embedded;skip=webpage,dash",
-                "--geo-bypass",
-                url,
-            ],
+            cmd,
             capture_output=True,
             text=True,
             timeout=60,
